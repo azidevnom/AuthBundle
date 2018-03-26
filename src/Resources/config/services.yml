@@ -1,0 +1,46 @@
+services:
+
+    MNC\Bundle\AuthBundle\Doctrine\PasswordHasherSubscriber:
+        arguments: ['@Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface']
+        public: false
+        tags:
+            - doctrine.event_subscriber
+
+    MNC\Bundle\AuthBundle\Security\TokenExtractor\HeaderTokenExtractor:
+        public: false
+        tags:
+            - auth.token_extractor
+
+    MNC\Bundle\AuthBundle\Security\TokenExtractor\QueryParamTokenExtractor:
+        public: false
+        tags:
+            - auth.token_extractor
+
+    MNC\Bundle\AuthBundle\Security\TokenExtractor\ChainTokenExtractor:
+        public: false
+
+    MNC\Bundle\AuthBundle\Security\JWT\HmacSigner:
+        public: true
+        arguments: ['%kernel.secret%']
+
+    auth.hmac_signer:
+        alias: 'MNC\Bundle\AuthBundle\Security\JWT\HmacSigner'
+
+    MNC\Bundle\AuthBundle\Security\Guard\ApiAuthenticator:
+        arguments:
+            - '@MNC\Bundle\AuthBundle\Security\TokenExtractor\ChainTokenExtractor'
+            - '@MNC\Bundle\AuthBundle\Security\JWT\Manager\JwtManager'
+            - '@event_dispatcher'
+        public: false
+
+    MNC\Bundle\AuthBundle\Security\JWT\Manager\JwtManager:
+        public: true
+        arguments:
+            - '@security.user.provider.concrete.user'
+            - '@security.password_encoder'
+            - '@auth.hmac_signer'
+            - '@event_dispatcher'
+
+    auth.jwt_manager:
+        public: true
+        alias: MNC\Bundle\AuthBundle\Security\JWT\Manager\JwtManager

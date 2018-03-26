@@ -1,0 +1,3 @@
+auth:
+    resource: MNC\Bundle\AuthBundle\Controller\ApiSecurityController
+    type: annotation
